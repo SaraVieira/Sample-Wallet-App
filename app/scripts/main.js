@@ -1,7 +1,7 @@
 (function(){
 'use strict';
-	angular.module('WalletApp', ['firebase'])
-		.controller('WalletCtrl', ['$scope', '$firebase', function($scope, $firebase) {
+	var app = angular.module('WalletApp', ['firebase']);
+		app.controller('WalletCtrl', ['$scope', '$firebase', function($scope, $firebase) {
 
 			// Check for a username on localStorage
 			if(!localStorage.getItem('username')) {
@@ -30,24 +30,25 @@
 			$scope.Movements = sync.$asArray();
 
 			// When a new value is added get a snapshot of table
-			db.on("value", function(snapshot) {
+			db.on('value', function(snapshot) {
 				$scope.Total = 0;
-				var AllAmounts = snapshot.val();
 
-				//for each child in selected table get the amount and add them to create a total
+				//for each child in selected table get the amount 
+				//and add them to create a total
 				snapshot.forEach(function(childSnapshot) {
 					  var key = childSnapshot.val();
 					  $scope.Total += key.amount;
 				});
 			}, function (errorObject) {
-			  console.log("The read failed: " + errorObject.code);
+			  console.log('The read failed: ' + errorObject.code);
 			});
 
-			// if is an addition to the wallet run this function that adds a row to the table
+			// if is an addition to the wallet run this function that 
+			//adds a row to the table
 			$scope.Add = function() {
 				$scope.Movements.$add({amount: $scope.amount, timestamp: Date.now()});
 				//reset input
-				$scope.amount = "";
+				$scope.amount = '';
 			};
 
 			// if subtract use this function
@@ -62,7 +63,8 @@
 				if( current >= 0) {
 					$scope.Movements.$add({amount: -$scope.amount, timestamp: Date.now()});
 				} else {
-					// the blance is negative so we show an error and add nopthing to the table
+					// the blance is negative so we show an error and add 
+					// nopthing to the table
 					jQuery('.add-amount').addClass('has-error');
 					jQuery( '.add-amount.has-error').keydown(function() {
 					 	$(this).removeClass('has-error');
@@ -70,10 +72,14 @@
                            
 				}
 				//reset input
-				$scope.amount = "";
+				$scope.amount = '';
 			};
 		}]);
-
+	app.filter('reverse', function() {
+	  return function(items) {
+	    return items.slice().reverse();
+	  };
+	});
 })();
 
 

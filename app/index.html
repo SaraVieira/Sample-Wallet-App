@@ -53,7 +53,7 @@
         </div>
       </div>
       <ul class="movements">
-        <li ng-repeat="movement in Movements">
+        <li ng-repeat="movement in Movements | reverse">
           <div class="col-sm-6">
             {{movement.amount}} <i class="fa fa-eur"></i>
           </div>
