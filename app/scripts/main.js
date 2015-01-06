@@ -74,6 +74,12 @@
 				//reset input
 				$scope.amount = '';
 			};
+
+			// Clear all data
+			$scope.clear = function() {
+				db.remove();
+			};
+
 		}]);
 	app.filter('reverse', function() {
 	  return function(items) {
