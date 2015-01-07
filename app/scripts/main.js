@@ -3,45 +3,50 @@
 	var app = angular.module('WalletApp', ['firebase']);
 		app.controller('WalletCtrl', ['$scope', '$firebase', function($scope, $firebase) {
 
+			// Get Values and Connect to firebase
+			$scope.getDb = function() {
+				// connect to firebase and to users table
+				var db = new Firebase('https://wallet-app.firebaseio.com/' + $scope.Username);
+				
+				// sync it with the server as pass results as an array
+				var sync = $firebase(db);
+
+				// get values as array
+				$scope.Movements = sync.$asArray();
+
+				// When a new value is added get a snapshot of table
+				db.on('value', function(snapshot) {
+					$scope.Total = 0;
+
+					//for each child in selected table get the amount 
+					//and add them to create a total
+					snapshot.forEach(function(childSnapshot) {
+						  var key = childSnapshot.val();
+						  $scope.Total += key.amount;
+					});
+				}, function (errorObject) {
+				  console.log('The read failed: ' + errorObject.code);
+				});
+			};
+
 			// Check for a username on localStorage
 			if(!localStorage.getItem('username')) {
 				// if not show modal so people can create one or continue with theirs
 				$('#modal').modal();
+			} else {
+				// Sets $scope.Username to whatever is in localStorage
+				$scope.Username = localStorage.getItem('username');
+				$scope.getDb();
 			}
 			
 			// Save username function that saves the desired username to local storage and hides the modal
 			$scope.SaveUsername = function() {
 				localStorage.setItem('username', $scope.Username);
-				console.log($scope.Username);
 				$('#modal').modal('hide');
+				// After all is added to localStorage run function to get values in database
+				// so it never returns null
+				$scope.getDb();
 			};
-
-			// Sets $scope.Username to whatever is in localStorage
-			$scope.Username = localStorage.getItem('username');
-
-			
-			// connect to firebase and to users table
-			var db = new Firebase('https://wallet-app.firebaseio.com/' + $scope.Username);
-			
-			// sync it with the server as pass results as an array
-			var sync = $firebase(db);
-
-			// get values as array
-			$scope.Movements = sync.$asArray();
-
-			// When a new value is added get a snapshot of table
-			db.on('value', function(snapshot) {
-				$scope.Total = 0;
-
-				//for each child in selected table get the amount 
-				//and add them to create a total
-				snapshot.forEach(function(childSnapshot) {
-					  var key = childSnapshot.val();
-					  $scope.Total += key.amount;
-				});
-			}, function (errorObject) {
-			  console.log('The read failed: ' + errorObject.code);
-			});
 
 			// if is an addition to the wallet run this function that 
 			//adds a row to the table
@@ -83,7 +88,9 @@
 		}]);
 	app.filter('reverse', function() {
 	  return function(items) {
-	    return items.slice().reverse();
+	  	if (items) {
+	    	return items.slice().reverse();
+		}
 	  };
 	});
 })();
